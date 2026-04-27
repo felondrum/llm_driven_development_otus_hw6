@@ -61,7 +61,7 @@ def main():
         
         for query in test_queries:
             print(f"\n📝 Запрос: {query}")
-            results = rag.search(query, top_k=2)
+            results = rag.search(query, top_k=5)
             
             for i, result in enumerate(results, 1):
                 print(f"  {i}. Score: {result['score']:.3f}")
@@ -72,10 +72,10 @@ def main():
         print("Генерация ответа RAG")
         print("=" * 60)
         
-        query = "Где находится деревня Мухино?"
+        query = "Мухино"
         print(f"\n📝 Запрос: {query}\n")
         
-        response = rag.generate_answer(query, top_k=3)
+        response = rag.generate_answer(query, top_k=6)
         
         print(f"💬 Ответ:\n{response['answer']}")
         print(f"\n📚 Использовано источников: {response.get('num_sources', len(response.get('sources', [])))}")
@@ -103,10 +103,6 @@ def main():
               f"({benchmark_results[fastest_ef]['avg_time_ms']:.2f}ms)")
         print(f"🎯 Самый точный: ef={max(benchmark_results.keys())} "
               f"(больше кандидатов = выше точность)")
-        print("\nРекомендация:")
-        print("  - Для production: ef=128 (баланс)")
-        print("  - Для тестирования: ef=256 (макс. точность)")
-        print("  - Для демо: ef=64 (макс. скорость)")
         
         # Шаг 7: Гибридный поиск (с фильтрацией)
         print("\n" + "=" * 60)
