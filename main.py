@@ -117,13 +117,7 @@ def main():
         )
         
         print(f"\nТекущая метрика: {metrics_info.get('current_metric', 'N/A')}")
-        print("\nДоступные метрики и их trade-offs:")
-        for metric_name, info in metrics_info.get('metrics_info', {}).items():
-            print(f"\n  {metric_name}:")
-            print(f"    Описание: {info['description']}")
-            print(f"    Применение: {info['use_case']}")
-            print(f"    Плюсы: {', '.join(info['pros'])}")
-            print(f"    Минусы: {', '.join(info['cons'])}")
+        print(f"Результатов найдено: {len(metrics_info.get('results', []))}")
         
         # Шаг 6c: Информация об ANN алгоритмах
         print("\n" + "=" * 60)
@@ -135,23 +129,19 @@ def main():
         for algo_name, algo in ann_info.get('algorithms', {}).items():
             print(f"\n  {algo_name} ({algo['full_name']}):")
             print(f"    Тип: {algo['type']}")
-            print(f"    Описание: {algo['description']}")
             print(f"    Плюсы: {', '.join(algo['pros'])}")
             print(f"    Минусы: {', '.join(algo['cons'])}")
-            print(f"    Лучше всего для: {algo['best_for']}")
             
             if algo.get('parameters'):
                 print(f"    Параметры:")
                 for param_name, param_info in algo['parameters'].items():
-                    print(f"      - {param_name}: {param_info.get('description', '')}")
-                    if 'trade_off' in param_info:
-                        print(f"        Trade-off: {param_info['trade_off']}")
+                    if isinstance(param_info, dict):
+                        print(f"      - {param_name}: {param_info.get('trade_off', '')}")
         
-        print("\n  Сводка по trade-offs:")
+        print("\n  Сводка по trade-offs скорость/точность:")
         speed_acc = ann_info.get('trade_offs_summary', {}).get('speed_vs_accuracy', {})
         for config_name, config_info in speed_acc.items():
             print(f"    - {config_name}: {config_info.get('config', '')}")
-            print(f"      Применение: {config_info.get('use_case', '')}")
         
         # Шаг 7: Гибридный поиск (с фильтрацией)
         print("\n" + "=" * 60)
@@ -191,55 +181,6 @@ def main():
         print("  ✓ Дополнительно: Сравнение метрик схожести (Cosine, Euclid, Dot)")
         print("  ✓ Дополнительно: Обзор ANN алгоритмов (HNSW, FLAT, IVF)")
         print("  ✓ Дополнительно: Детальный анализ trade-offs")
-        
-        # Проверки выполнения заданий
-        print("\n" + "=" * 60)
-        print("ПРОВЕРКА ВЫПОЛНЕНИЯ ЗАДАНИЙ")
-        print("=" * 60)
-        
-        checks = {
-            "Часть 1. Настройка и индексация": [
-                ("Установка и настройка Qdrant", True),
-                ("Изучение параметров HNSW (m, ef_construct)", True),
-                ("Создание оптимальной схемы для индексации", True),
-                ("Изучение ANN алгоритма HNSW", True),
-            ],
-            "Часть 2. Реализация поиска": [
-                ("Семантический поиск по векторам", True),
-                ("Similarity metrics (cosine, euclidean, etc.)", True),
-                ("Фильтрация по метаданным", True),
-                ("Настройка параметров top-k", True),
-                ("Оптимизация параметров поиска", True),
-                ("Тестирование производительности на разных запросах", True),
-                ("Сравнение точность vs скорость", True),
-            ],
-            "Бонусные задания": [
-                ("Сравнение нескольких ANN-алгоритмов на одном датасете", True),
-                ("Hybrid search (векторный + текстовый / фильтрации)", True),
-                ("Batch processing для больших объемов запросов", True),
-            ],
-            "Дополнительно": [
-                ("Изучение используемых алгоритмов и их параметров", True),
-                ("Понимание trade-offs между скоростью и точностью", True),
-                ("Явные проверки для всех заданий", True),
-            ],
-        }
-        
-        all_passed = True
-        for category, items in checks.items():
-            print(f"\n{category}:")
-            for task_name, passed in items:
-                status = "✓" if passed else "✗"
-                print(f"  {status} {task_name}")
-                if not passed:
-                    all_passed = False
-        
-        print("\n" + "=" * 60)
-        if all_passed:
-            print("✓ ВСЕ ЗАДАНИЯ ВЫПОЛНЕНЫ И ПРОВЕРЕНЫ!")
-        else:
-            print("⚠ Некоторые задания требуют внимания")
-        print("=" * 60)
         
     except KeyboardInterrupt:
         print("\n\nПрервано пользователем")
