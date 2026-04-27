@@ -54,9 +54,9 @@ def main():
         print("=" * 60)
         
         test_queries = [
-            "Что такое Википедия?",
-            "Кто основал Википедию?",
-            "Когда была создана Википедия?",
+            "Что такое Адыгэ макъ (Голос адыга)?",
+            "Где находится деревня Мухино?",
+            "В какой день начался регулярный чемпионат начался НМХЛ в 2018 году?",
         ]
         
         for query in test_queries:
@@ -72,7 +72,7 @@ def main():
         print("Генерация ответа RAG")
         print("=" * 60)
         
-        query = "Что такое Википедия и как она работает?"
+        query = "Где находится деревня Мухино?"
         print(f"\n📝 Запрос: {query}\n")
         
         response = rag.generate_answer(query, top_k=3)
@@ -113,7 +113,7 @@ def main():
         print("Гибридный поиск с фильтрацией по метаданным")
         print("=" * 60)
         
-        filter_query = "википедия"
+        filter_query = "адыгея"
         filter_dict = {"source": "misterkirill/ru-wikipedia"}
         
         print(f"\n📝 Запрос: {filter_query}")
