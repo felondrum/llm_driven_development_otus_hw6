@@ -171,10 +171,10 @@ class QdrantManager:
             if ef:
                 search_params["hnsw_ef"] = ef
             
-            # Поиск
-            results = self.client.search(
+            # Поиск с использованием query_points (новый API Qdrant)
+            results = self.client.query_points(
                 collection_name=collection_name,
-                query_vector=query_vector,
+                query=query_vector,
                 limit=top_k,
                 score_threshold=score_threshold,
                 query_filter=search_filter,
@@ -184,12 +184,12 @@ class QdrantManager:
             
             # Форматирование результатов
             formatted_results = []
-            for result in results:
+            for result in results.points:
                 formatted_results.append({
                     "id": result.id,
                     "score": result.score,
                     "payload": result.payload,
-                    "vector": result.vector if result.vector else None,
+                    "vector": result.vector if hasattr(result, 'vector') and result.vector else None,
                 })
             
             return formatted_results

@@ -48,9 +48,9 @@ def main():
         print("=" * 60)
         
         test_queries = [
-            "Что такое кварц?",
-            "Какие свойства у гранита?",
-            "Где находят алмазы?",
+            "Что такое Википедия?",
+            "Кто основал Википедию?",
+            "На каких языках существует Википедия?",
         ]
         
         for query in test_queries:
@@ -66,13 +66,13 @@ def main():
         print("Генерация ответа RAG")
         print("=" * 60)
         
-        query = "Что такое кварц и где он применяется?"
+        query = "Что такое Википедия и как она работает?"
         print(f"\n📝 Запрос: {query}\n")
         
         response = rag.generate_answer(query, top_k=3)
         
         print(f"💬 Ответ:\n{response['answer']}")
-        print(f"\n📚 Использовано источников: {response['num_sources']}")
+        print(f"\n📚 Использовано источников: {response.get('num_sources', len(response.get('sources', [])))}")
         
         # Шаг 6: Бенчмарк с разными параметрами HNSW (ef)
         print("\n" + "=" * 60)
