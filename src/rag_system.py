@@ -196,12 +196,25 @@ class RAGSystem:
         self,
         queries: List[str],
         ef_values: List[int] = [32, 64, 128, 256],
+        num_iterations: int = 3,
     ) -> Dict:
-        """Бенчмарк производительности поиска с разными параметрами"""
+        """Бенчмарк производительности поиска с разными параметрами
+        
+        Args:
+            queries: Список запросов для тестирования
+            ef_values: Значения ef для сравнения
+            num_iterations: Количество итераций для каждого запроса
+            
+        Returns:
+            Словарь с результатами бенчмарка по каждому ef
+        """
         
         import time
         
         results = {}
+        
+        print(f"\nЗапуск бенчмарка с {len(queries)} запросами, {num_iterations} итераций каждый")
+        print(f"Тестируемые ef значения: {ef_values}\n")
         
         for ef in ef_values:
             times = []
@@ -209,28 +222,221 @@ class RAGSystem:
             for query in queries:
                 query_emb = self.ollama.get_embedding(query)
                 
-                start = time.time()
-                # Примечание: текущая версия query_points не поддерживает динамическое изменение ef
-                # Поэтому бенчмарк показывает базовую скорость поиска без изменения ef
-                self.qdrant.search(
-                    query_vector=query_emb,
-                    top_k=5,
-                    ef=ef,  # Параметр игнорируется в текущей реализации
-                )
-                elapsed = time.time() - start
+                if not query_emb:
+                    continue
                 
-                times.append(elapsed)
+                # Выполняем несколько итераций для усреднения
+                for _ in range(num_iterations):
+                    start = time.time()
+                    self.qdrant.search(
+                        query_vector=query_emb,
+                        top_k=5,
+                        ef=ef,
+                    )
+                    elapsed = time.time() - start
+                    times.append(elapsed)
             
-            avg_time = sum(times) / len(times)
-            results[ef] = {
-                "avg_time_sec": avg_time,
-                "avg_time_ms": avg_time * 1000,
-                "queries_tested": len(queries),
-            }
-            
-            print(f"ef={ef}: среднее время = {avg_time*1000:.2f}ms (примечание: ef не применяется)")
+            if times:
+                avg_time = sum(times) / len(times)
+                min_time = min(times)
+                max_time = max(times)
+                
+                results[ef] = {
+                    "avg_time_sec": avg_time,
+                    "avg_time_ms": avg_time * 1000,
+                    "min_time_ms": min_time * 1000,
+                    "max_time_ms": max_time * 1000,
+                    "queries_tested": len(queries),
+                    "total_measurements": len(times),
+                }
+                
+                print(f"ef={ef:3d}: среднее={avg_time*1000:7.2f}ms, "
+                      f"мин={min_time*1000:7.2f}ms, макс={max_time*1000:7.2f}ms")
         
         return results
+    
+    def compare_similarity_metrics(
+        self,
+        query: str,
+        top_k: int = 5,
+    ) -> Dict:
+        """Сравнение различных метрик схожести
+        
+        Примечание: Qdrant использует одну метрику на коллекцию,
+        поэтому это демонстрация концепции с объяснением trade-offs.
+        
+        Args:
+            query: Текст запроса
+            top_k: Количество результатов
+            
+        Returns:
+            Результаты поиска с текущей метрикой и информация о других метриках
+        """
+        
+        from src.config import DISTANCE_METRIC
+        
+        query_emb = self.ollama.get_embedding(query)
+        
+        if not query_emb:
+            return {
+                "current_metric": DISTANCE_METRIC,
+                "results": [],
+                "metrics_info": {
+                    "Cosine": {
+                        "description": "Косинусное сходство (-1 до 1)",
+                        "use_case": "Семантический поиск, текстовые эмбеддинги",
+                        "pros": ["Нормализует векторы", "Хорошо для высокоразмерных данных"],
+                        "cons": ["Игнорирует магнитуду вектора"],
+                    },
+                    "Euclid": {
+                        "description": "Евклидово расстояние (0 до ∞)",
+                        "use_case": "Когда важна абсолютная дистанция",
+                        "pros": ["Интуитивно понятно", "Работает с любой размерностью"],
+                        "cons": ["Чувствительно к масштабу", "Медленнее в высоких размерностях"],
+                    },
+                    "Dot": {
+                        "description": "Скалярное произведение",
+                        "use_case": "Когда важны и направление, и магнитуда",
+                        "pros": ["Быстрое вычисление", "Работает с нормализованными векторами как Cosine"],
+                        "cons": ["Результаты зависят от масштаба векторов"],
+                    },
+                },
+            }
+        
+        # Поиск с текущей метрикой (Cosine по умолчанию)
+        cosine_results = self.qdrant.search(
+            query_vector=query_emb,
+            top_k=top_k,
+        )
+        
+        return {
+            "current_metric": DISTANCE_METRIC,
+            "results": cosine_results,
+            "metrics_info": {
+                "Cosine": {
+                    "description": "Косинусное сходство (-1 до 1)",
+                    "use_case": "Семантический поиск, текстовые эмбеддинги",
+                    "pros": ["Нормализует векторы", "Хорошо для высокоразмерных данных"],
+                    "cons": ["Игнорирует магнитуду вектора"],
+                },
+                "Euclid": {
+                    "description": "Евклидово расстояние (0 до ∞)",
+                    "use_case": "Когда важна абсолютная дистанция",
+                    "pros": ["Интуитивно понятно", "Работает с любой размерностью"],
+                    "cons": ["Чувствительно к масштабу", "Медленнее в высоких размерностях"],
+                },
+                "Dot": {
+                    "description": "Скалярное произведение",
+                    "use_case": "Когда важны и направление, и магнитуда",
+                    "pros": ["Быстрое вычисление", "Работает с нормализованными векторами как Cosine"],
+                    "cons": ["Результаты зависят от масштаба векторов"],
+                },
+            },
+        }
+    
+    def get_ann_algorithms_info(self) -> Dict:
+        """Получить информацию о ANN алгоритмах и их trade-offs
+        
+        Returns:
+            Информация об алгоритмах, их параметрах и trade-offs
+        """
+        
+        from src.config import HNSW_CONFIG
+        
+        return {
+            "algorithms": {
+                "HNSW": {
+                    "full_name": "Hierarchical Navigable Small World",
+                    "type": "Графовый индекс",
+                    "description": "Строит многоуровневый граф для быстрого поиска",
+                    "parameters": {
+                        "m": {
+                            "description": "Количество связей на узел",
+                            "typical_range": "8-64",
+                            "current_value": HNSW_CONFIG["m"],
+                            "trade_off": "Больше m = выше точность, но больше памяти и медленнее построение",
+                        },
+                        "ef_construct": {
+                            "description": "Размер кандидата при построении индекса",
+                            "typical_range": "50-400",
+                            "current_value": HNSW_CONFIG["ef_construct"],
+                            "trade_off": "Больше ef_construct = лучше качество графа, но медленнее индексация",
+                        },
+                        "ef": {
+                            "description": "Размер поиска при запросе",
+                            "typical_range": "16-1024",
+                            "current_value": "настраивается динамически",
+                            "trade_off": "Больше ef = выше точность, но медленнее поиск",
+                        },
+                    },
+                    "pros": [
+                        "Очень быстрый поиск (O(log N))",
+                        "Хорошая точность",
+                        "Подходит для больших датасетов",
+                    ],
+                    "cons": [
+                        "Требует больше памяти",
+                        "Дольше строится чем простые индексы",
+                        "Аппроксимативный (не 100% точность)",
+                    ],
+                    "best_for": "Production системы с балансом скорость/точность",
+                },
+                "FLAT": {
+                    "full_name": "Exact Search (Brute Force)",
+                    "type": "Точный поиск",
+                    "description": "Полное сканирование всех векторов",
+                    "parameters": {},
+                    "pros": [
+                        "100% точность",
+                        "Простая реализация",
+                        "Хорошо для маленьких датасетов (<10K векторов)",
+                    ],
+                    "cons": [
+                        "Медленный O(N)",
+                        "Не масштабируется",
+                    ],
+                    "best_for": "Маленькие датасеты или когда критична 100% точность",
+                },
+                "IVF": {
+                    "full_name": "Inverted File Index",
+                    "type": "Инвертированный индекс",
+                    "description": "Кластеризация векторов с последующим поиском по кластерам",
+                    "parameters": {
+                        "nlist": "Количество кластеров",
+                        "nprobe": "Количество кластеров для поиска",
+                    },
+                    "pros": [
+                        "Хороший баланс скорость/память",
+                        "Масштабируется лучше чем HNSW для очень больших данных",
+                    ],
+                    "cons": [
+                        "Требует настройки количества кластеров",
+                        "Может пропустить релевантные векторы в граничных кластерах",
+                    ],
+                    "best_for": "Очень большие датасеты (>1M векторов)",
+                },
+            },
+            "trade_offs_summary": {
+                "speed_vs_accuracy": {
+                    "fast_low_accuracy": {
+                        "config": "HNSW с m=8, ef=32",
+                        "use_case": "Демо, прототипы, real-time приложения",
+                    },
+                    "balanced": {
+                        "config": f"HNSW с m={HNSW_CONFIG['m']}, ef=128",
+                        "use_case": "Production системы",
+                    },
+                    "high_accuracy_slow": {
+                        "config": "HNSW с m=64, ef=512 или FLAT",
+                        "use_case": "Научные исследования, критичные приложения",
+                    },
+                },
+                "memory_vs_speed": {
+                    "low_memory": "FLAT или IVF с малым nlist",
+                    "high_memory_fast": "HNSW с большим m",
+                },
+            },
+        }
     
     def get_stats(self) -> Dict:
         """Получение статистики системы"""
