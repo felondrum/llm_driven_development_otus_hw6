@@ -13,8 +13,10 @@ EMBEDDING_MODEL = "all-minilm"  # 384 dimensions, ~80MB
 GENERATION_MODEL = "qwen2.5:3b"  # 3B параметров, оптимизирована
 
 # Qdrant конфигурация
-QDRANT_URL = "http://localhost:6333"
-QDRANT_GRPC_PORT = 6334
+# Используем in-memory базу для тестирования без docker
+# Для production замените на: QDRANT_URL = "http://localhost:6333"
+QDRANT_URL = ":memory:"  # In-memory режим (не требует docker)
+QDRANT_GRPC_PORT = None
 
 # Коллекция для векторов
 COLLECTION_NAME = "rag_documents"
@@ -68,3 +70,8 @@ BENCHMARK_CONFIG = {
     "warmup_queries": 10,
     "test_ef_values": [32, 64, 128, 256],  # Для тестирования HNSW
 }
+
+# Примечание: для работы с Ollama и Qdrant server необходимо:
+# 1. Запустить docker-compose up -d
+# 2. Изменить QDRANT_URL на "http://localhost:6333"
+# 3. Убедиться что Ollama запущен и модели загружены

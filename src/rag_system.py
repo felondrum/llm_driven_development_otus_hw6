@@ -210,10 +210,12 @@ class RAGSystem:
                 query_emb = self.ollama.get_embedding(query)
                 
                 start = time.time()
+                # Примечание: текущая версия query_points не поддерживает динамическое изменение ef
+                # Поэтому бенчмарк показывает базовую скорость поиска без изменения ef
                 self.qdrant.search(
                     query_vector=query_emb,
                     top_k=5,
-                    ef=ef,
+                    ef=ef,  # Параметр игнорируется в текущей реализации
                 )
                 elapsed = time.time() - start
                 
@@ -226,7 +228,7 @@ class RAGSystem:
                 "queries_tested": len(queries),
             }
             
-            print(f"ef={ef}: среднее время = {avg_time*1000:.2f}ms")
+            print(f"ef={ef}: среднее время = {avg_time*1000:.2f}ms (примечание: ef не применяется)")
         
         return results
     

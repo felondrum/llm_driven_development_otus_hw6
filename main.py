@@ -26,7 +26,7 @@ def main():
         # Шаг 2: Загрузка и индексация датасета
         num_chunks = rag.load_and_index_dataset(
             dataset_name="misterkirill/ru-wikipedia",
-            max_samples=300  # Ограничим для быстрого теста
+            max_samples=None  # Загружаем весь датасет
         )
         
         if num_chunks == 0:

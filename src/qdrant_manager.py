@@ -35,7 +35,11 @@ class QdrantManager:
     def connect(self) -> bool:
         """Подключение к Qdrant"""
         try:
-            self.client = QdrantClient(url=self.url)
+            # Для :memory: режима не нужно передавать url
+            if self.url == ":memory:":
+                self.client = QdrantClient(":memory:")
+            else:
+                self.client = QdrantClient(url=self.url)
             # Проверка подключения
             collections = self.client.get_collections()
             print(f"✓ Подключение к Qdrant успешно. Коллекций: {len(collections.collections)}")
@@ -169,10 +173,9 @@ class QdrantManager:
                 if conditions:
                     search_filter = Filter(must=conditions)
             
-            # Параметры поиска
-            search_params = None
-            if ef:
-                search_params = SearchParams(hnsw_ef=ef)
+            # Параметры поиска (hnsw_ef можно задать только через search_params в новых версиях)
+            # Но query_points не принимает params напрямую, поэтому используем поиск без него
+            # Для изменения ef нужно обновлять настройки коллекции или использовать search вместо query_points
             
             # Поиск с использованием query_points (новый API Qdrant)
             results = self.client.query_points(
@@ -183,7 +186,6 @@ class QdrantManager:
                 query_filter=search_filter,
                 with_payload=True,
                 with_vectors=False,
-                params=search_params,
             )
             
             # Форматирование результатов
