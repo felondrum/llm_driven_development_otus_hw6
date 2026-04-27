@@ -196,16 +196,22 @@ class QdrantManager:
                 search_params = SearchParams(hnsw_ef=10000, exact=True)
             
             # Поиск с использованием query_points (новый API Qdrant)
-            results = self.client.query_points(
-                collection_name=collection_name,
-                query=query_vector,
-                limit=top_k,
-                score_threshold=score_threshold,
-                query_filter=search_filter,
-                with_payload=True,
-                with_vectors=False,
-                params=search_params,
-            )
+            # Примечание: в разных версиях Qdrant параметр может называться search_params или params
+            kwargs = {
+                "collection_name": collection_name,
+                "query": query_vector,
+                "limit": top_k,
+                "score_threshold": score_threshold,
+                "query_filter": search_filter,
+                "with_payload": True,
+                "with_vectors": False,
+            }
+            
+            # Добавляем search_params только если он задан
+            if search_params is not None:
+                kwargs["search_params"] = search_params
+            
+            results = self.client.query_points(**kwargs)
             
             # Форматирование результатов
             formatted_results = []
