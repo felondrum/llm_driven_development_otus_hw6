@@ -155,8 +155,19 @@ class QdrantManager:
         score_threshold: Optional[float] = None,
         filter_dict: Optional[Dict[str, Any]] = None,
         ef: Optional[int] = None,
+        use_exact_search: bool = False,
     ) -> List[Dict]:
-        """Поиск похожих векторов"""
+        """Поиск похожих векторов
+        
+        Args:
+            query_vector: Вектор запроса
+            collection_name: Имя коллекции
+            top_k: Количество результатов
+            score_threshold: Порог схожести
+            filter_dict: Фильтр по метаданным
+            ef: Параметр HNSW ef (размер поиска)
+            use_exact_search: Если True, использовать точный поиск (FLAT) вместо ANN
+        """
         
         try:
             # Построение фильтра через HTTP модели
@@ -173,9 +184,16 @@ class QdrantManager:
                 if conditions:
                     search_filter = Filter(must=conditions)
             
-            # Параметры поиска (hnsw_ef можно задать только через search_params в новых версиях)
-            # Но query_points не принимает params напрямую, поэтому используем поиск без него
-            # Для изменения ef нужно обновлять настройки коллекции или использовать search вместо query_points
+            # Параметры поиска с hnsw_ef для управления точностью/скоростью
+            search_params = None
+            if ef is not None:
+                search_params = SearchParams(hnsw_ef=ef)
+            
+            # Для exact search используем другой подход - задаем очень высокий ef
+            # или можно создать отдельную коллекцию с FLAT индексом
+            if use_exact_search:
+                # Точный поиск через полный сканирование (очень высокий ef)
+                search_params = SearchParams(hnsw_ef=10000, exact=True)
             
             # Поиск с использованием query_points (новый API Qdrant)
             results = self.client.query_points(
@@ -186,6 +204,7 @@ class QdrantManager:
                 query_filter=search_filter,
                 with_payload=True,
                 with_vectors=False,
+                params=search_params,
             )
             
             # Форматирование результатов
