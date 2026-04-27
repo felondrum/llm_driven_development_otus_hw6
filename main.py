@@ -107,7 +107,7 @@ def main():
         print("Гибридный поиск с фильтрацией по метаданным")
         print("=" * 60)
         
-        filter_query = "минералы"
+        filter_query = "адыгея"
         filter_dict = {"source": "misterkirill/ru-wikipedia"}
         
         print(f"\n📝 Запрос: {filter_query}")
