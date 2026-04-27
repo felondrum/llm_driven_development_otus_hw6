@@ -7,10 +7,13 @@ from qdrant_client.models import (
     Distance,
     VectorParams,
     PointStruct,
+    HnswConfigDiff,
+)
+from qdrant_client.http.models import (
     Filter,
     FieldCondition,
     MatchValue,
-    HnswConfigDiff,
+    SearchParams,
 )
 from typing import List, Dict, Any, Optional
 from src.config import (
@@ -152,7 +155,7 @@ class QdrantManager:
         """Поиск похожих векторов"""
         
         try:
-            # Построение фильтра
+            # Построение фильтра через HTTP модели
             search_filter = None
             if filter_dict:
                 conditions = []
@@ -167,9 +170,9 @@ class QdrantManager:
                     search_filter = Filter(must=conditions)
             
             # Параметры поиска
-            search_params = {}
+            search_params = None
             if ef:
-                search_params["hnsw_ef"] = ef
+                search_params = SearchParams(hnsw_ef=ef)
             
             # Поиск с использованием query_points (новый API Qdrant)
             results = self.client.query_points(
@@ -179,7 +182,8 @@ class QdrantManager:
                 score_threshold=score_threshold,
                 query_filter=search_filter,
                 with_payload=True,
-                params=search_params if search_params else None,
+                with_vectors=False,
+                params=search_params,
             )
             
             # Форматирование результатов
@@ -189,7 +193,7 @@ class QdrantManager:
                     "id": result.id,
                     "score": result.score,
                     "payload": result.payload,
-                    "vector": result.vector if hasattr(result, 'vector') and result.vector else None,
+                    "vector": None,  # Не запрашиваем векторы для экономии памяти
                 })
             
             return formatted_results
