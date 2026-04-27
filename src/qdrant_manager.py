@@ -212,9 +212,13 @@ class QdrantManager:
         """Получение информации о коллекции"""
         try:
             info = self.client.get_collection(collection_name=collection_name)
+            # Получаем количество векторов (совместимо с разными версиями Qdrant)
+            vectors_count = getattr(info, 'vectors_count', None) or getattr(info, 'points_count', 0)
+            points_count = getattr(info, 'points_count', 0)
+            
             return {
-                "vectors_count": info.vectors_count,
-                "points_count": info.points_count,
+                "vectors_count": vectors_count if vectors_count is not None else points_count,
+                "points_count": points_count,
                 "status": info.status,
                 "config": {
                     "hnsw": info.config.hnsw_config if info.config else None,

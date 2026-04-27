@@ -52,6 +52,12 @@ class OllamaClient:
     def get_embedding(self, text: str, model: str = EMBEDDING_MODEL) -> Optional[List[float]]:
         """Получить эмбеддинг для текста"""
         try:
+            # Ограничиваем длину текста для предотвращения ошибки context length
+            # all-minilm имеет ограничение ~256 токенов (~1500 символов)
+            max_length = 1400
+            if len(text) > max_length:
+                text = text[:max_length]
+            
             response = ollama.embeddings(model=model, prompt=text)
             return response.get('embedding')
         except Exception as e:

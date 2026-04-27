@@ -39,6 +39,20 @@ class RAGSystem:
         if not self.ollama.check_connection():
             return False
         
+        # Проверка наличия моделей
+        available_models = self.ollama.list_models()
+        from src.config import EMBEDDING_MODEL, GENERATION_MODEL
+        
+        if EMBEDDING_MODEL not in available_models:
+            print(f"⚠ Модель {EMBEDDING_MODEL} не найдена. Загрузка...")
+            if not self.ollama.pull_model(EMBEDDING_MODEL):
+                return False
+        
+        if GENERATION_MODEL not in available_models:
+            print(f"⚠ Модель {GENERATION_MODEL} не найдена. Загрузка...")
+            if not self.ollama.pull_model(GENERATION_MODEL):
+                return False
+        
         # Создание коллекции
         if not self.qdrant.create_collection(recreate=recreate_collection):
             return False
@@ -221,11 +235,13 @@ class RAGSystem:
         
         collection_info = self.qdrant.get_collection_info()
         
+        from src.config import EMBEDDING_MODEL, GENERATION_MODEL
+        
         return {
             "collection": collection_info,
             "models": {
-                "embedding": "all-minilm",
-                "generation": "llama3.2",
+                "embedding": EMBEDDING_MODEL,
+                "generation": GENERATION_MODEL,
             },
         }
     
