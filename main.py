@@ -26,7 +26,7 @@ def main():
         # Шаг 2: Загрузка и индексация датасета
         num_chunks = rag.load_and_index_dataset(
             dataset_name="misterkirill/ru-wikipedia",
-            max_samples=300  # Ограничим для быстрого теста
+            max_samples=None  # Загружаем весь датасет
         )
         
         if num_chunks == 0:
@@ -56,7 +56,7 @@ def main():
         test_queries = [
             "Что такое Википедия?",
             "Кто основал Википедию?",
-            "На каких языках существует Википедия?",
+            "Когда была создана Википедия?",
         ]
         
         for query in test_queries:
@@ -113,7 +113,7 @@ def main():
         print("Гибридный поиск с фильтрацией по метаданным")
         print("=" * 60)
         
-        filter_query = "минералы"
+        filter_query = "википедия"
         filter_dict = {"source": "misterkirill/ru-wikipedia"}
         
         print(f"\n📝 Запрос: {filter_query}")
