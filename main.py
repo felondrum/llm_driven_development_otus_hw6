@@ -1,8 +1,3 @@
-"""
-Основной скрипт для запуска RAG системы
-Выполняет все шаги ДЗ: настройка, индексация, поиск, бенчмарк
-"""
-
 import sys
 from src.rag_system import RAGSystem
 from src.config import BENCHMARK_CONFIG
@@ -12,8 +7,8 @@ def main():
     """Главная функция"""
     
     print("\n" + "=" * 60)
-    print("RAG СИСТЕМА - Домашнее задание")
-    print("Векторная БД: Qdrant | Модели: Ollama (Mac M1)")
+    print("RAG СИСТЕМА")
+    print("Векторная БД: Qdrant | Модели: Ollama")
     print("=" * 60 + "\n")
     
     # Инициализация системы
@@ -30,7 +25,7 @@ def main():
         
         # Шаг 2: Загрузка и индексация датасета
         num_chunks = rag.load_and_index_dataset(
-            dataset_name="dariaz/mineral_wiki_ru",
+            dataset_name="misterkirill/ru-wikipedia",
             max_samples=300  # Ограничим для быстрого теста
         )
         
@@ -113,7 +108,7 @@ def main():
         print("=" * 60)
         
         filter_query = "минералы"
-        filter_dict = {"source": "dariaz/mineral_wiki_ru"}
+        filter_dict = {"source": "misterkirill/ru-wikipedia"}
         
         print(f"\n📝 Запрос: {filter_query}")
         print(f"🔍 Фильтр: {filter_dict}")
