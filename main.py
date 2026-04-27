@@ -38,9 +38,15 @@ def main():
         print("Статистика системы")
         print("=" * 60)
         stats = rag.get_stats()
-        print(f"Векторов в базе: {stats['collection']['vectors_count']}")
-        print(f"Модель эмбеддингов: {stats['models']['embedding']}")
-        print(f"Модель генерации: {stats['models']['generation']}")
+        if stats and stats.get('collection'):
+            print(f"Векторов в базе: {stats['collection'].get('vectors_count', 'N/A')}")
+        else:
+            print("Векторов в базе: N/A")
+        if stats and stats.get('models'):
+            print(f"Модель эмбеддингов: {stats['models'].get('embedding', 'N/A')}")
+            print(f"Модель генерации: {stats['models'].get('generation', 'N/A')}")
+        else:
+            print("Модели: N/A")
         
         # Шаг 4: Тестовый поиск
         print("\n" + "=" * 60)
