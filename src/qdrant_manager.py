@@ -186,17 +186,14 @@ class QdrantManager:
             
             # Параметры поиска с hnsw_ef для управления точностью/скоростью
             search_params = None
-            if ef is not None:
-                search_params = SearchParams(hnsw_ef=ef)
-            
-            # Для exact search используем другой подход - задаем очень высокий ef
-            # или можно создать отдельную коллекцию с FLAT индексом
-            if use_exact_search:
-                # Точный поиск через полный сканирование (очень высокий ef)
-                search_params = SearchParams(hnsw_ef=10000, exact=True)
+            if ef is not None or use_exact_search:
+                # Для exact search используем очень высокий ef и exact=True
+                # Если ef не задан и не exact search, используем дефолтное значение 128
+                hnsw_ef_value = 10000 if use_exact_search else (ef if ef is not None else 128)
+                exact_flag = use_exact_search
+                search_params = SearchParams(hnsw_ef=hnsw_ef_value, exact=exact_flag)
             
             # Поиск с использованием query_points (новый API Qdrant)
-            # Примечание: в разных версиях Qdrant параметр может называться search_params или params
             kwargs = {
                 "collection_name": collection_name,
                 "query": query_vector,
