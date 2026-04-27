@@ -119,30 +119,6 @@ def main():
         print(f"\nТекущая метрика: {metrics_info.get('current_metric', 'N/A')}")
         print(f"Результатов найдено: {len(metrics_info.get('results', []))}")
         
-        # Шаг 6c: Информация об ANN алгоритмах
-        print("\n" + "=" * 60)
-        print("ANN Алгоритмы: Сравнение и trade-offs")
-        print("=" * 60)
-        
-        ann_info = rag.get_ann_algorithms_info()
-        
-        for algo_name, algo in ann_info.get('algorithms', {}).items():
-            print(f"\n  {algo_name} ({algo['full_name']}):")
-            print(f"    Тип: {algo['type']}")
-            print(f"    Плюсы: {', '.join(algo['pros'])}")
-            print(f"    Минусы: {', '.join(algo['cons'])}")
-            
-            if algo.get('parameters'):
-                print(f"    Параметры:")
-                for param_name, param_info in algo['parameters'].items():
-                    if isinstance(param_info, dict):
-                        print(f"      - {param_name}: {param_info.get('trade_off', '')}")
-        
-        print("\n  Сводка по trade-offs скорость/точность:")
-        speed_acc = ann_info.get('trade_offs_summary', {}).get('speed_vs_accuracy', {})
-        for config_name, config_info in speed_acc.items():
-            print(f"    - {config_name}: {config_info.get('config', '')}")
-        
         # Шаг 7: Гибридный поиск (с фильтрацией)
         print("\n" + "=" * 60)
         print("Гибридный поиск с фильтрацией по метаданным")
@@ -162,25 +138,6 @@ def main():
         
         for i, result in enumerate(hybrid_results, 1):
             print(f"  {i}. Score: {result['score']:.3f}, Source: {result['payload']['source']}")
-        
-        print("\n" + "=" * 60)
-        print("✓ Все задания выполнены успешно!")
-        print("=" * 60)
-        
-        # Краткое резюме
-        print("\n📋 РЕЗЮМЕ ВЫПОЛНЕННОГО:")
-        print("  ✓ Часть 1: Настройка Qdrant с HNSW индексом")
-        print("  ✓ Часть 1: Изучены параметры ANN (m, ef_construct, ef)")
-        print("  ✓ Часть 2: Реализован семантический поиск")
-        print("  ✓ Часть 2: Настроены similarity metrics (Cosine)")
-        print("  ✓ Часть 2: Реализована фильтрация по метаданным")
-        print("  ✓ Часть 2: Протестированы разные top-k")
-        print("  ✓ Бонус: Сравнение ef параметров (скорость vs точность)")
-        print("  ✓ Бонус: Hybrid search (вектор + фильтр)")
-        print("  ✓ Бонус: Batch processing при индексации")
-        print("  ✓ Дополнительно: Сравнение метрик схожести (Cosine, Euclid, Dot)")
-        print("  ✓ Дополнительно: Обзор ANN алгоритмов (HNSW, FLAT, IVF)")
-        print("  ✓ Дополнительно: Детальный анализ trade-offs")
         
     except KeyboardInterrupt:
         print("\n\nПрервано пользователем")
