@@ -1,0 +1,7 @@
+qdrant_storage/
+ollama_data/
+*.pyc
+__pycache__/
+.env
+data/*.json
+data/*.txt
