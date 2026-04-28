@@ -135,9 +135,9 @@ def main():
             filter_dict=filter_dict,
             top_k=3,
         )
-        
+
         for i, result in enumerate(hybrid_results, 1):
-            print(f"  {i}. Score: {result['score']:.3f}, Source: {result['payload']['source']}")
+            print(f"  {i}. Score: {result['score']:.3f}, Source: {result['payload']['text']}")
         
     except KeyboardInterrupt:
         print("\n\nПрервано пользователем")

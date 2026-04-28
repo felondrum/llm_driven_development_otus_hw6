@@ -5,12 +5,11 @@
 # Ollama
 OLLAMA_BASE_URL = "http://localhost:11434"
 
-# Модель для эмбеддингов - multilingual, поддерживает русский
-# all-minilm имеет ограничение контекста, используем меньшие чанки
-EMBEDDING_MODEL = "all-minilm"  # 384 dimensions, ~80MB
+# Модель для эмбеддингов
+EMBEDDING_MODEL = "nomic-embed-text"
 
 # Модель для генерации ответов
-GENERATION_MODEL = "qwen2.5:3b"  # 3B параметров, оптимизирована
+GENERATION_MODEL = "qwen2.5:3b"
 
 # Qdrant конфигурация
 # Используем in-memory базу для тестирования без docker

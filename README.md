@@ -27,7 +27,7 @@ docker-compose up -d
 
 ```bash
 # Эмбеддинги (мультиязычная, поддерживает русский)
-docker exec ollama_rag ollama pull all-minilm
+docker exec ollama_rag ollama pull nomic-embed-text
 
 # Модель для генерации
 docker exec ollama_rag ollama pull qwen2.5:3b

@@ -137,21 +137,8 @@ class DatasetProcessor:
 def load_russian_dataset():
     """
     Загрузка русскоязычного датасета
-    Рекомендованные датасеты:
-    1. dariaz/mineral_wiki_ru - статьи о минералах (компактный, ~1.5K)
-    2. t-tech/tnews - новости на русском (большой)
-    3. bigscience/xlsum - многоязычный с русским
     """
     
     processor = DatasetProcessor()
-    
-    # Пробуем загрузить компактный датасет о минералах
-    success = processor.load_dataset("dariaz/mineral_wiki_ru", max_samples=500)
-    
-    if not success:
-        print("Попробуем альтернативный датасет...")
-        # Альтернатива - можно использовать любой текстовый датасет
-        processor.config["name"] = "t-tech/tnews"
-        success = processor.load_dataset(max_samples=500)
-    
+    success = processor.load_dataset("misterkirill/ru-wikipedia", max_samples=500)
     return processor if success else None
