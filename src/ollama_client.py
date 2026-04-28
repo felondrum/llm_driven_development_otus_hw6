@@ -5,7 +5,7 @@
 import ollama
 from typing import List, Optional
 from src.config import OLLAMA_BASE_URL, EMBEDDING_MODEL, GENERATION_MODEL
-
+import random
 
 class OllamaClient:
     """Клиент для взаимодействия с Ollama"""

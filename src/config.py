@@ -12,9 +12,7 @@ EMBEDDING_MODEL = "nomic-embed-text"
 GENERATION_MODEL = "qwen2.5:3b"
 
 # Qdrant конфигурация
-# Используем in-memory базу для тестирования без docker
-# Для production замените на: QDRANT_URL = "http://localhost:6333"
-QDRANT_URL = ":memory:"  # In-memory режим (не требует docker)
+QDRANT_URL = "http://localhost:6333"
 QDRANT_GRPC_PORT = None
 
 # Коллекция для векторов
