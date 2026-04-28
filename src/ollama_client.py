@@ -53,9 +53,8 @@ class OllamaClient:
     def get_embedding(self, text: str, model: str = EMBEDDING_MODEL) -> Optional[List[float]]:
         """Получить эмбеддинг для текста"""
         try:
-            # Ограничиваем длину текста для предотвращения ошибки context length
-            # all-minilm имеет ограничение ~256 токенов (~1500 символов)
-            max_length = 1400
+            # nomic-embed-text имеет ограничение ~512 токенов (~3000 символов)
+            max_length = 2800
             if len(text) > max_length:
                 text = text[:max_length]
             
@@ -64,8 +63,8 @@ class OllamaClient:
         except Exception as e:
             # Генерируем фиктивный эмбеддинг для тестирования без Ollama
             print(f"⚠ Эмбеддинг не получен ({e}), используем заглушку")
-            import random
-            return [random.random() for _ in range(384)]  # Фиктивный вектор для all-minilm
+            from src.config import VECTOR_SIZE
+            return [random.random() for _ in range(VECTOR_SIZE)]  # Фиктивный вектор с правильной размерностью
     
     def get_embeddings_batch(self, texts: List[str], model: str = EMBEDDING_MODEL) -> List[List[float]]:
         """Получить эмбеддинги для батча текстов"""
